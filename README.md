@@ -18,9 +18,7 @@ Create `.env` file that contains a token to your discord bot in the following fo
 
     TOKEN=<your token>
 
-Install all necessary packages
-
-    pip install .
+Install all the necessary packages
 
 Run the `main.py` file
 
