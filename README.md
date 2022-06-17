@@ -20,6 +20,16 @@ Create `.env` file that contains a token to your discord bot in the following fo
 
 Install all the necessary packages
 
+Make sure to comment line 54
+
+    self._dislikes = self._ydl_info['dislike_count']
+    
+in
+
+    \Lib\site-packages\pafy\backend_youtube_dl.py
+    
+due to a bug caused by YouTube removing dislikes
+
 Run the `main.py` file
 
     python main.py
