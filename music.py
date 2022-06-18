@@ -3,10 +3,12 @@ import asyncio
 import youtube_dl
 import pafy
 from discord.ext import commands
+from swap import swap_backend_youtube_dl
 
 class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        swap_backend_youtube_dl()
         self.song_queue = {}
         self.setup()
 
@@ -27,7 +29,9 @@ class Player(commands.Cog):
         return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
     async def play_song(self, ctx, song):
+    
         url = pafy.new(song).getbestaudio().url
+
         ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url)),
                               after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
         ctx.voice_client.source.voulume = 0.2
