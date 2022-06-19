@@ -1,6 +1,3 @@
-from cmath import inf
-from turtle import width
-from types import DynamicClassAttribute
 import discord
 import asyncio
 import youtube_dl
