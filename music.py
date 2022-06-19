@@ -99,7 +99,7 @@ class Player(commands.Cog):
 
         info = await self.search_song(5, song)
 
-        embed = discord.Embed(title=f"Results for '{song}':", descriptrion="You can use the URL's to play the exact song if the one you want isn't on the list")
+        embed = discord.Embed(title=f"Results for '{song}':", description="You can use the URL's to play the exact song if the one you want isn't on the list")
 
         amount = 0
         for entry in info['entries']:
