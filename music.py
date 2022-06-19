@@ -1,3 +1,6 @@
+from cmath import inf
+from turtle import width
+from types import DynamicClassAttribute
 import discord
 import asyncio
 import youtube_dl
@@ -20,34 +23,36 @@ class Player(commands.Cog):
 
     async def check_queue(self, ctx):
         if len(self.song_queue[ctx.guild.id]) > 0:
-            ctx.voice_client.stop()
             await self.play_song(ctx, self.song_queue[ctx.guild.id][0])
             self.song_queue[ctx.guild.id].pop(0)
-
+            
+            
     async def search_song(self, amount, song, get_url=False):
         info = await self.bot.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True, "source_address" :  '0.0.0.0'}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
         if len(info['entries']) == 0: return None
-
-        return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
+        if get_url:
+            return info['entries'][0]['title'], info['entries'][0]['webpage_url'],info['entries'][0]['channel'],info['entries'][0]['thumbnail']
+        else:
+            return info
 
     async def play_song(self, ctx, song):
-    
         url = pafy.new(song).getbestaudio().url
-
-        ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url)),
-                              after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
+        ctx.voice_client.stop()
+        ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url)), after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
         ctx.voice_client.source.voulume = 0.2
 
     @commands.command()
     async def join(self, ctx):
-        self.setup()
+        if self.song_queue == {}:
+            self.setup()
         if ctx.author.voice is None:
             return await ctx.send("Connect to a voice channel in order to use this bot")
 
-        if ctx.voice_client is not None:
+        if ctx.voice_client is not None and ctx.voice_client.channel != ctx.author.voice.channel:
             await ctx.voice_client.disconnect()
 
-        await ctx.author.voice.channel.connect()
+        if ctx.voice_client is None:
+            await ctx.author.voice.channel.connect()
 
     @commands.command()
     async def leave(self, ctx):
@@ -56,9 +61,12 @@ class Player(commands.Cog):
 
         await ctx.send("I'm not connected to any channel")
 
+
+
     @commands.command()
     async def play(self, ctx, *, song=None):
-
+        
+        await self.join(ctx)
 
         if song is None:
             return await ctx.send("You must enter a song to play")
@@ -72,24 +80,29 @@ class Player(commands.Cog):
             await ctx.send("Searching for song, this may take a while...")
 
             result = await self.search_song(1, song, get_url=True)
-
+        
             if result is None:
                 return await ctx.send("Sorry i could not find the given song")
 
-            song = result[0]
+            song = result[1]
 
-        if ctx.voice_client.source is not None:
+        if ctx.voice_client.source is not None and ctx.voice_client.is_playing():
             queue_len = len(self.song_queue[ctx.guild.id])
-
             if queue_len < 10:
                 self.song_queue[ctx.guild.id].append(song)
-                return await ctx.send(f"Added to queue. Songs in queue: {queue_len + 1}")
+                return await ctx.send(f"Added to queue {song} Songs in queue: {queue_len + 1}")
 
             else:
                 return await ctx.send("Exeded queue limit")
-
+        
         await self.play_song(ctx, song)
-        await ctx.send(f"Now playing: {song}")
+        embed = discord.Embed(title=result[0], url=song, color=discord.Colour.green())
+        embed.set_author(name="Now playing:")
+        embed.add_field(name="Channel:", value=result[2], inline=False)
+        embed.set_thumbnail(url=self.bot.user.avatar_url)
+        embed.set_image(url=result[3])
+        embed.set_footer(text="okay i pull up")
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def search(self, ctx, *, song=None):
@@ -99,7 +112,7 @@ class Player(commands.Cog):
 
         info = await self.search_song(5, song)
 
-        embed = discord.Embed(title=f"Results for '{song}':", description="You can use the URL's to play the exact song if the one you want isn't on the list")
+        embed = discord.Embed(title=f"Results for '{song}':", description="You can use the URL's to play the exact song if the one you want isn't on the list\n")
 
         amount = 0
         for entry in info['entries']:
@@ -110,6 +123,7 @@ class Player(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    # displays song queue
     @commands.command()
     async def queue(self, ctx):
         if len(self.song_queue[ctx.guild.id]) == 0:
@@ -126,6 +140,7 @@ class Player(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    # skips a song
     @commands.command()
     async def skip(self, ctx):
         if ctx.voice_client is None:
