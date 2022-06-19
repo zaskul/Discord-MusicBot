@@ -3,4 +3,7 @@ asyncio
 youtube-dl
 pafy
 PyNaCl
+<<<<<<< HEAD
 python-dotenv
+=======
+>>>>>>> e214fb7e1dcfb5b4c37e0f0ca4d197c020881144
