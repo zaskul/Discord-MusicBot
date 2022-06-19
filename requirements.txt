@@ -3,3 +3,4 @@ asyncio
 youtube-dl
 pafy
 PyNaCl
+python-dotenv

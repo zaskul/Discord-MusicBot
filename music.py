@@ -2,8 +2,10 @@ import discord
 import asyncio
 import youtube_dl
 import pafy
+import os
 from discord.ext import commands
 from swap import swap_backend_youtube_dl
+from dotenv import load_dotenv
 
 class Player(commands.Cog):
     def __init__(self, bot):
@@ -23,7 +25,7 @@ class Player(commands.Cog):
             self.song_queue[ctx.guild.id].pop(0)
 
     async def search_song(self, amount, song, get_url=False):
-        info = await self.bot.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
+        info = await self.bot.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True, "source_address" :  '0.0.0.0'}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
         if len(info['entries']) == 0: return None
 
         return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
@@ -104,7 +106,7 @@ class Player(commands.Cog):
             embed.description += f"[{entry['title']}]({entry['webpage_url']})\n"
             amount += 1
 
-        embed.set_footer(text=f"Displaying the first {amount} results")
+        embed.set_footer(text=f"Displaying the first {amount} results.")
 
         await ctx.send(embed=embed)
 
@@ -133,7 +135,7 @@ class Player(commands.Cog):
             return await ctx.send("You are not in any voice channel.")
 
         if ctx.author.voice.channel.id != ctx.voice_client.channel.id:
-            return await ctx.send("I am not playing any songs for you")
+            return await ctx.send("I am not playing any songs for you.")
 
         ctx.voice_client.stop()
         await self.check_queue(ctx)
