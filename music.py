@@ -96,7 +96,7 @@ class Player(commands.Cog):
         embed = discord.Embed(title=result[0], url=song, color=discord.Colour.green())
         embed.set_author(name="Now playing:")
         embed.add_field(name="Channel:", value=result[2], inline=False)
-        embed.set_thumbnail(url=self.bot.user.avatar_url)
+        # embed.set_thumbnail(url=self.bot.user.avatar_url)
         embed.set_image(url=result[3])
         embed.set_footer(text="okay i pull up")
         await ctx.send(embed=embed)

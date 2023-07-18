@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 
 bot = commands.Bot(command_prefix="?", intents=intents)
@@ -15,6 +15,5 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} is ready")
-
-bot.add_cog(Player(bot))
+    await bot.add_cog(Player(bot))
 bot.run(TOKEN)
