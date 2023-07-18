@@ -24,6 +24,8 @@ Install all the necessary packages
 
     pip install -r requirements.txt
 
+`note that this bot was made before Heroku removed their free plan!`
+
 If you want to use a service like Heroku follow their guide on how to deploy a Python app:
 
 https://devcenter.heroku.com/articles/getting-started-with-python
